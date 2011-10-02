@@ -31,7 +31,6 @@ public class DatabaseView {
 		
 		playerData.addClaim(claim);
 		database.insert(claim);
-		database.update(playerData);
 	}
 	
 	/**
@@ -40,6 +39,10 @@ public class DatabaseView {
 	 * @return the number of claims owned by the player.
 	 */
 	public int getNumberOfClaims(Player player) {
+		if(getPlayerData(player).getClaims() == null) {
+			return 0;
+		}
+		
 		return getPlayerData(player).getClaims().size();
 	}
 	
@@ -63,10 +66,10 @@ public class DatabaseView {
 		int chunkZ = player.getLocation().getBlock().getChunk().getZ();
 		
 		// Check if there is a non-diagonal adjacent claim in the same world
-		for(Claim claim : playerData.getClaims()) {
-			if(claim.getWorldUUID() == player.getLocation().getWorld().getUID() 
-					&& (claim.getChunkX() == chunkX && (claim.getChunkZ() - 1 == chunkZ || claim.getChunkZ() + 1 == chunkZ))
-					|| (claim.getChunkZ() == chunkZ && (claim.getChunkX() - 1 == chunkX || claim.getChunkX() + 1 == chunkX))) {
+		for(Claim claim : playerData.getClaims()) {			
+			if(claim.getWorldUUID().equals(player.getLocation().getWorld().getUID()) 
+				&& (claim.getChunkX() == chunkX && (claim.getChunkZ() - 1 == chunkZ || claim.getChunkZ() + 1 == chunkZ)) 
+				|| (claim.getChunkZ() == chunkZ && (claim.getChunkX() - 1 == chunkX || claim.getChunkX() + 1 == chunkX))) {
 				return true;
 			}
 		}		
@@ -100,10 +103,7 @@ public class DatabaseView {
 		if(claim == null) {
 			return false;
 		}		
-		PlayerData owner = claim.getOwner();
-		
-		owner.getClaims().remove(claim);
-		database.update(owner);
+				
 		database.delete(claim);
 		
 		return true;

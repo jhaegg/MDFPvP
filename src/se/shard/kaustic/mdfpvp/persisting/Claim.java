@@ -2,10 +2,8 @@ package se.shard.kaustic.mdfpvp.persisting;
 
 import java.util.UUID;
 
-import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
@@ -15,16 +13,16 @@ import org.bukkit.Chunk;
 @Table(name = "MDFPvP_Claim")
 public class Claim {
 	@Id
-	@Column(name = "ClaimId")
-	private int Id;
+	private int claimId;
 	private int chunkX;
 	private int chunkZ;
 	private UUID worldUUID;
 	@ManyToOne
-	@JoinColumn(name = "OwnerId")
 	private PlayerData owner;
 	private boolean protect;
 
+	public Claim() {}
+	
 	public Claim(Chunk chunk) {
 		chunkX = chunk.getX();
 		chunkZ = chunk.getZ();
@@ -35,16 +33,16 @@ public class Claim {
 	 * Gets the primary key of the claim.
 	 * @return the primary key of the claim.
 	 */
-	public int getId() {
-		return Id;
+	public int getClaimId() {
+		return claimId;
 	}
 
 	/**
 	 * Sets the primary key of the claim.
 	 * @param id the new primary key of the claim.
 	 */
-	public void setId(int id) {
-		Id = id;
+	public void setClaimId(int claimId) {
+		this.claimId = claimId;
 	}
 
 	/**
@@ -109,16 +107,13 @@ public class Claim {
 	 */
 	public void setOwner(PlayerData owner) {
 		this.owner = owner;
-		if(!owner.getClaims().contains(this)) {
-			owner.getClaims().add(this);
-		}
 	}
 
 	/**
 	 * Gets if the claims is protected from creepers.
 	 * @return true if the chunk is protected, otherwise false.
 	 */
-	public boolean getProtect() {
+	public boolean isProtect() {
 		return protect;
 	}
 
@@ -128,5 +123,14 @@ public class Claim {
 	 */
 	public void setProtect(boolean protect) {
 		this.protect = protect;
-	}	
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if(obj instanceof Claim) {
+			Claim claim = (Claim)obj;
+			return claim.worldUUID == this.worldUUID && claim.chunkX == this.chunkX && claim.chunkZ == this.chunkZ;
+		}		
+		return false;
+	}
 }

@@ -34,7 +34,7 @@ public class ClaimCommand extends CommandHandler {
 		}
 		
 		//Check if the player is far enough from the spawn. 
-		int distanceLeft = (int)(plugin.getConfiguration().getInt("MinDistanceFromSpawn", 350) - player.getWorld().getSpawnLocation().distance(player.getBedSpawnLocation()));
+		int distanceLeft = (int)(plugin.getConfiguration().getInt("MinDistanceFromSpawn", 350) - player.getWorld().getSpawnLocation().distance(player.getLocation()));
 
 		if(distanceLeft > 0) {
 			sender.sendMessage("To close to spawn, move another " + distanceLeft + " steps.");
@@ -64,7 +64,7 @@ public class ClaimCommand extends CommandHandler {
 		//Claim chunk and update experience.
 		player.setTotalExperience(remainingXP);
 		plugin.getDatabaseView().claimChunk(player);
-		
+		sender.sendMessage("Chunk claimed.");
 		return true;
 	}
 	

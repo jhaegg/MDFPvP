@@ -123,7 +123,7 @@ public class MDFPvPPlayerListener extends PlayerListener {
 						player.sendMessage("Leaving " + chunkOwnerPair.getOwner() + "s claim.");
 					}
 					else {
-						player.sendMessage("Entering" + owner + "s claim.");
+						player.sendMessage("Entering " + owner + "s claim.");
 					}
 					chunkOwnerPair.setOwner(owner);
 				}

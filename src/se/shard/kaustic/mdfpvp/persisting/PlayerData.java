@@ -1,9 +1,8 @@
 package se.shard.kaustic.mdfpvp.persisting;
 
-import java.util.Collection;
+import java.util.List;
 import java.util.UUID;
 
-import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
@@ -21,7 +20,6 @@ import com.avaje.ebean.validation.NotNull;
 @Table(name = "MDFPvP_PlayerData")
 public class PlayerData {
 	@Id
-	@Column(name = "PlayerId")
 	private int playerId;
 	@NotNull
 	private String playerName;
@@ -29,8 +27,10 @@ public class PlayerData {
 	private int deaths;
 	private int kills;
 	private int killed;
-	@OneToMany(mappedBy = "ClaimId")
-	Collection<Claim> claims;
+	@OneToMany(mappedBy = "owner")
+	List<Claim> claims;
+	
+	public PlayerData() {}
 	
 	public PlayerData(Player player) {
 		playerName = player.getName();
@@ -45,8 +45,8 @@ public class PlayerData {
 	 * @param claim the claim which should be added to the list of claims.
 	 */
 	public void addClaim(Claim claim) {
-		claims.add(claim);
-		if(claim.getOwner() != this) {
+		if(!claims.contains(claim)) {
+			claims.add(claim);
 			claim.setOwner(this);
 		}
 	}
@@ -151,7 +151,7 @@ public class PlayerData {
 	 * Gets the collection of claims owned by the player.
 	 * @return the collections of claims owned by the player.
 	 */
-	public Collection<Claim> getClaims() {
+	public List<Claim> getClaims() {
 		return claims;
 	}
 
@@ -159,7 +159,17 @@ public class PlayerData {
 	 * Sets the collection of claims owned by the player.
 	 * @param claims the new collection of claims owned by the player.
 	 */
-	public void setClaims(Collection<Claim> claims) {
+	public void setClaims(List<Claim> claims) {
 		this.claims = claims;
-	}	
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if(obj instanceof PlayerData) {
+			return ((PlayerData)obj).playerUUID == this.playerUUID;
+		}
+		return false;
+	}
+	
+	
 }
