@@ -13,6 +13,9 @@ import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import se.shard.kaustic.mdfpvp.commands.ClaimCommand;
+import se.shard.kaustic.mdfpvp.commands.RemoveClaimCommand;
+import se.shard.kaustic.mdfpvp.commands.SetXPCommand;
+import se.shard.kaustic.mdfpvp.listeners.MDFPvPBlockListener;
 import se.shard.kaustic.mdfpvp.listeners.MDFPvPPlayerListener;
 import se.shard.kaustic.mdfpvp.persisting.Claim;
 import se.shard.kaustic.mdfpvp.persisting.PlayerData;
@@ -24,6 +27,7 @@ import se.shard.kaustic.mdfpvp.persisting.PlayerData;
 
 public class MDFPvP extends JavaPlugin {
 	private DatabaseView databaseView;
+	private final MDFPvPBlockListener blockListener = new MDFPvPBlockListener(this);
 	private final MDFPvPPlayerListener playerListener = new MDFPvPPlayerListener(this);
 	private final Class<?>[] databaseClasses = {PlayerData.class, Claim.class};
 	private PluginDescriptionFile pdf; 
@@ -45,11 +49,16 @@ public class MDFPvP extends JavaPlugin {
 		
 		// Register commands
 		getCommand("claim").setExecutor(new ClaimCommand(this));
+		getCommand("setxp").setExecutor(new SetXPCommand(this));
+		getCommand("removeclaim").setExecutor(new RemoveClaimCommand(this));
 		
 		// Register player events.
 		pm.registerEvent(Event.Type.PLAYER_MOVE, playerListener, Priority.Normal, this);
 		
 		// Register block events.
+		pm.registerEvent(Event.Type.BLOCK_BREAK, blockListener, Priority.Normal, this);
+		pm.registerEvent(Event.Type.BLOCK_IGNITE, blockListener, Priority.Normal, this);
+		pm.registerEvent(Event.Type.BLOCK_PLACE, blockListener, Priority.Normal, this);
 		
 		// Register entity events.
 		
@@ -62,7 +71,10 @@ public class MDFPvP extends JavaPlugin {
 		return Arrays.asList(databaseClasses);
 	}
 
-	public void initDatabase() {
+	/**
+	 * Initializes the database.
+	 */
+	private void initDatabase() {
 		try {
 			for(Class<?> databaseClass : databaseClasses) {
 				getDatabase().find(databaseClass).findRowCount();
@@ -74,6 +86,7 @@ public class MDFPvP extends JavaPlugin {
 		}
 		
 		databaseView = new DatabaseView(this, getDatabase());
+
 	}
 	
 	public DatabaseView getDatabaseView() {

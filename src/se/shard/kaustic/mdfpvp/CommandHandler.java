@@ -12,7 +12,6 @@ import org.bukkit.entity.Player;
 public abstract class CommandHandler implements CommandExecutor {
 	protected final MDFPvP plugin;
 	
-
 	public abstract boolean onCommand(CommandSender sender, Command command, String label, String[] args);
 	
 	/**
@@ -36,5 +35,31 @@ public abstract class CommandHandler implements CommandExecutor {
 			sender.sendMessage("Command does not accept anonymous usage.");
 			return true;
 		}
-	}	
+	}
+	
+	/**
+	 * Returns the target player of the command
+	 * @param sender the sender of the command
+	 * @param maxArgs the number of arguments a non-self targeting version of the command takes
+	 * @param args command arguments.
+	 * @return sender if non-targeted and used by player, target if found or null on error.
+	 */
+	protected static Player getTarget(CommandSender sender, int maxArgs, String[] args) {
+		if(args.length < maxArgs) {
+			if(isAnonymous(sender)) {
+				return null;
+			}
+			else {
+				return (Player)sender;
+			}
+		}
+		else {
+			Player player = sender.getServer().matchPlayer(args[0]).get(0);
+			if(player == null) {
+				sender.sendMessage("No such player " + args[0] + ".");
+				return null;
+			}
+			return player;
+		}
+	}
 }

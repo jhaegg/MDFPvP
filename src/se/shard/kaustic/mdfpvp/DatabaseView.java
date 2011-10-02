@@ -74,6 +74,58 @@ public class DatabaseView {
 	}
 	
 	/**
+	 * Checks if the player is the owner of the chunk.
+	 * @param player the player to be checked.
+	 * @param chunk the chunk to be checked.
+	 * @return true if player owns chunk, otherwise false.
+	 */
+	public boolean isOwner(Player player, Chunk chunk) {
+		Claim claim = getClaim(chunk);
+		
+		if(claim == null) {
+			return false;
+		}
+		
+		return claim.getOwner().getPlayerUUID() == player.getUniqueId();
+	}
+	
+	/**
+	 * Removes any claim on the chunk.
+	 * @param chunk the chunk to be unclaimed.
+	 * @return true if removed, otherwise false.
+	 */
+	public boolean removeClaim(Chunk chunk) {
+		Claim claim = getClaim(chunk);
+		
+		if(claim == null) {
+			return false;
+		}		
+		PlayerData owner = claim.getOwner();
+		
+		owner.getClaims().remove(claim);
+		database.update(owner);
+		database.delete(claim);
+		
+		return true;
+	}
+	
+	/**
+	 * Checks if the player can change the chunk.
+	 * @param player the player to be checked.
+	 * @param chunk the chunk to be checked.
+	 * @return true if player is owner or if the chunk is not claimed.  
+	 */
+	public boolean canChange(Player player, Chunk chunk) {
+		Claim claim = getClaim(chunk);
+		
+		if(claim == null) {
+			return true;
+		}
+		
+		return claim.getOwner().getPlayerUUID() == player.getUniqueId();
+	}
+	
+	/**
 	 * Evaluates if the chunk is claimed by another player or not.
 	 * @param chunk the chunk to be evaluated.
 	 * @return true if the chunk is claimed, otherwise false.
@@ -133,6 +185,5 @@ public class DatabaseView {
 			throw new IllegalArgumentException("No such player " + player + ".");
 		}		
 		return playerData;
-	}
-
+	}	
 }
