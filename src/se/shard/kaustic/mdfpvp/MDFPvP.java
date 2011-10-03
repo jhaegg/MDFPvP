@@ -12,6 +12,7 @@ import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import se.shard.kaustic.mdfpvp.commands.AllowCommand;
 import se.shard.kaustic.mdfpvp.commands.ClaimCommand;
 import se.shard.kaustic.mdfpvp.commands.RemoveClaimCommand;
 import se.shard.kaustic.mdfpvp.commands.SetXPCommand;
@@ -48,9 +49,11 @@ public class MDFPvP extends JavaPlugin {
 		initDatabase();
 		
 		// Register commands
-		getCommand("claim").setExecutor(new ClaimCommand(this));
-		getCommand("setxp").setExecutor(new SetXPCommand(this));
+		getCommand("claim").setExecutor(new ClaimCommand(this));		
 		getCommand("removeclaim").setExecutor(new RemoveClaimCommand(this));
+		getCommand("allow").setExecutor(new AllowCommand(this, true));
+		getCommand("disallow").setExecutor(new AllowCommand(this, false));
+		getCommand("setxp").setExecutor(new SetXPCommand(this));
 		
 		// Register player events.
 		pm.registerEvent(Event.Type.PLAYER_MOVE, playerListener, Priority.Normal, this);

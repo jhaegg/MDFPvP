@@ -89,7 +89,7 @@ public class DatabaseView {
 			return false;
 		}
 		
-		return claim.getOwner().getPlayerUUID() == player.getUniqueId();
+		return claim.getOwner().getPlayerUUID().equals(player.getUniqueId());
 	}
 	
 	/**
@@ -110,6 +110,32 @@ public class DatabaseView {
 	}
 	
 	/**
+	 * Add or remove player to list of tenants.
+	 * @param owner the player who wants to allow tenants.
+	 * @param tenant the player which status should be changed.
+	 * @param allow true if add to list of allowed, false if remove. 
+	 * @return true if successfully added or removed, otherwise false.
+	 */
+	public boolean changeTenantStatus(Player owner, Player tenant, boolean allow) {
+		PlayerData ownerData = getPlayerData(owner);
+		PlayerData tenantData = getPlayerData(tenant);
+		
+		if(allow) {
+			if(ownerData.addTenant(tenantData)) {
+				database.save(ownerData);
+				return true;
+			}			
+		}
+		else {
+			if(ownerData.removeTenant(tenantData)) {
+				database.save(ownerData);
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	/**
 	 * Checks if the player can change the chunk.
 	 * @param player the player to be checked.
 	 * @param chunk the chunk to be checked.
@@ -117,12 +143,16 @@ public class DatabaseView {
 	 */
 	public boolean canChange(Player player, Chunk chunk) {
 		Claim claim = getClaim(chunk);
-		
+				
 		if(claim == null) {
 			return true;
-		}
+		}		
+		if(claim.getOwner().getPlayerUUID().equals(player.getUniqueId())) {
+			return true;
+		}		
+		PlayerData playerData = getPlayerData(player);
 		
-		return claim.getOwner().getPlayerUUID() == player.getUniqueId();
+		return claim.getOwner().getTenants().contains(playerData);
 	}
 	
 	/**

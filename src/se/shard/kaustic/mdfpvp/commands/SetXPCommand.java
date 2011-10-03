@@ -19,6 +19,11 @@ public class SetXPCommand extends CommandHandler {
 	
 	@Override
 	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+		if(args.length < 1) {
+			sender.sendMessage("Command requires at least one parameter.");
+			return false;
+		}
+		
 		Player target = getTarget(sender, 2, args);
 		int xp;
 		

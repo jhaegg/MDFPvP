@@ -14,6 +14,14 @@ commands:
   removeclaim: 
     description: Removes the claim the player is standing on.
     permission: mdfpvp.mechanics.removeclaim    
+
+  allow:
+    description: Add a number of players to the list of players allowed the change the players claim.
+    permission: mdfpvp.mechanics.allow
+
+  disallow:
+    description: Remove a number of players from the list of players allowed the change the players claim.
+    permission: mdfpvp.mechanics.disallow
     
   setxp:
     description: Sets the total xp of the player
@@ -34,7 +42,15 @@ permissions:
   mdfpvp.mechanics.removeclaim:
     description: Allows user to remove a claim.
     default: true
-
+    
+  mdfpvp.mechanics.allow:
+    description: Allows a user to add players to the list of players allowed to change the players claims.
+    default: true
+    
+  mdfpvp.mechanics.disallow:
+    description: Allows a user to remove players from the list of players allowed to change the players claims.
+    default: true
+  
   mdfpvp.admin.*:
     description: Gives access to all administrator commands.
     children:

@@ -3,8 +3,12 @@ package se.shard.kaustic.mdfpvp.persisting;
 import java.util.List;
 import java.util.UUID;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.JoinTable;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
@@ -29,6 +33,10 @@ public class PlayerData {
 	private int killed;
 	@OneToMany(mappedBy = "owner")
 	List<Claim> claims;
+	@ManyToMany(cascade = CascadeType.PERSIST)
+	@JoinTable(name = "MDFPvP_Tenant",
+			joinColumns={@JoinColumn(name = "tenant_id", referencedColumnName = "player_id")})
+	List<PlayerData> tenants;
 	
 	public PlayerData() {}
 	
@@ -50,7 +58,23 @@ public class PlayerData {
 			claim.setOwner(this);
 		}
 	}
-
+	
+	public boolean addTenant(PlayerData tenant) {
+		if(!tenants.contains(tenant)) {
+			tenants.add(tenant);
+			return true;
+		}
+		return false;
+	}
+	
+	public boolean removeTenant(PlayerData tenant) {
+		if(tenants.contains(tenant)) {
+			tenants.remove(tenant);
+			return true;
+		}
+		return false;
+	}
+	
 	/**
 	 * Gets the primary key of the player data.
 	 * @return the player primary key.
@@ -140,7 +164,7 @@ public class PlayerData {
 	}
 
 	/**
-	 * Sets the numbr of times the player has been killed by another player.
+	 * Sets the number of times the player has been killed by another player.
 	 * @param killed the new number of times the player has been killed by another player.
 	 */
 	public void setKilled(int killed) {
@@ -163,10 +187,26 @@ public class PlayerData {
 		this.claims = claims;
 	}
 
+	/**
+	 * Gets the list of players allowed to change the claims owned by this player.
+	 * @return the list of tenants allowed to change the claims owned by this player. 
+	 */
+	public List<PlayerData> getTenants() {
+		return tenants;
+	}
+
+	/**
+	 * Sets the list of players allowed to change the claims owned by this player.
+	 * @param tenants the new list of tenants allowed to change the claims owned by this player.
+	 */
+	public void setTenants(List<PlayerData> tenants) {
+		this.tenants = tenants;
+	}
+	
 	@Override
 	public boolean equals(Object obj) {
-		if(obj instanceof PlayerData) {
-			return ((PlayerData)obj).playerUUID == this.playerUUID;
+		if(obj instanceof PlayerData) { 
+			return ((PlayerData)obj).playerUUID.equals(this.playerUUID);
 		}
 		return false;
 	}
