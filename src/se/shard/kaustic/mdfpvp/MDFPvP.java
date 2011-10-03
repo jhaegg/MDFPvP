@@ -15,10 +15,13 @@ import org.bukkit.plugin.java.JavaPlugin;
 import se.shard.kaustic.mdfpvp.commands.AllowCommand;
 import se.shard.kaustic.mdfpvp.commands.ClaimCommand;
 import se.shard.kaustic.mdfpvp.commands.RemoveClaimCommand;
+import se.shard.kaustic.mdfpvp.commands.ResetDeathChestCommand;
 import se.shard.kaustic.mdfpvp.commands.SetXPCommand;
 import se.shard.kaustic.mdfpvp.listeners.MDFPvPBlockListener;
+import se.shard.kaustic.mdfpvp.listeners.MDFPvPEntityListener;
 import se.shard.kaustic.mdfpvp.listeners.MDFPvPPlayerListener;
 import se.shard.kaustic.mdfpvp.persisting.Claim;
+import se.shard.kaustic.mdfpvp.persisting.DeathChest;
 import se.shard.kaustic.mdfpvp.persisting.PlayerData;
 
 /**
@@ -30,7 +33,8 @@ public class MDFPvP extends JavaPlugin {
 	private DatabaseView databaseView;
 	private final MDFPvPBlockListener blockListener = new MDFPvPBlockListener(this);
 	private final MDFPvPPlayerListener playerListener = new MDFPvPPlayerListener(this);
-	private final Class<?>[] databaseClasses = {PlayerData.class, Claim.class};
+	private final MDFPvPEntityListener entityListener = new MDFPvPEntityListener(this);
+	private final Class<?>[] databaseClasses = {PlayerData.class, Claim.class, DeathChest.class};
 	private PluginDescriptionFile pdf; 
 	@Override
 	public void onDisable() {
@@ -53,9 +57,12 @@ public class MDFPvP extends JavaPlugin {
 		getCommand("removeclaim").setExecutor(new RemoveClaimCommand(this));
 		getCommand("allow").setExecutor(new AllowCommand(this, true));
 		getCommand("disallow").setExecutor(new AllowCommand(this, false));
-		getCommand("setxp").setExecutor(new SetXPCommand(this));
+		getCommand("resetdeathchest").setExecutor(new ResetDeathChestCommand(this));
+		getCommand("setxp").setExecutor(new SetXPCommand(this));		
 		
 		// Register player events.
+		pm.registerEvent(Event.Type.PLAYER_INTERACT, playerListener, Priority.Normal, this);
+		pm.registerEvent(Event.Type.PLAYER_JOIN, playerListener, Priority.Normal, this);
 		pm.registerEvent(Event.Type.PLAYER_MOVE, playerListener, Priority.Normal, this);
 		
 		// Register block events.
@@ -64,6 +71,8 @@ public class MDFPvP extends JavaPlugin {
 		pm.registerEvent(Event.Type.BLOCK_PLACE, blockListener, Priority.Normal, this);
 		
 		// Register entity events.
+		pm.registerEvent(Event.Type.ENTITY_DEATH, entityListener, Priority.Normal, this);
+		pm.registerEvent(Event.Type.ENTITY_EXPLODE, entityListener, Priority.Normal, this);
 		
 		// Notify of completion.
 		getServer().getLogger().log(Level.INFO, "Done.");
@@ -87,13 +96,10 @@ public class MDFPvP extends JavaPlugin {
 			getServer().getLogger().log(Level.INFO, "Creating database for " + pdf.getName() + ".");
 			installDDL();
 		}
-		
 		databaseView = new DatabaseView(this, getDatabase());
-
 	}
 	
 	public DatabaseView getDatabaseView() {
 		return databaseView;
 	}
-
 }

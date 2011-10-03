@@ -4,7 +4,9 @@ import java.util.HashMap;
 import java.util.UUID;
 
 import org.bukkit.Chunk;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerBedEnterEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
@@ -96,14 +98,22 @@ public class MDFPvPPlayerListener extends PlayerListener {
 
 	@Override
 	public void onPlayerInteract(PlayerInteractEvent event) {
-		// TODO Auto-generated method stub
-		super.onPlayerInteract(event);
+		// Don't allow other players to open a players death chest.
+		if(event.getAction() == Action.RIGHT_CLICK_BLOCK) {
+			if(event.getClickedBlock().getType() == Material.CHEST 
+					&& !plugin.getDatabaseView().canOpenChest(event.getPlayer(), event.getClickedBlock())) {
+				event.setCancelled(true);
+				event.getPlayer().sendMessage("It is locked...");
+			}
+		}
 	}
 
 	@Override
 	public void onPlayerJoin(PlayerJoinEvent event) {
-		// TODO Auto-generated method stub
-		super.onPlayerJoin(event);
+		// Notify player of missing death chest.
+		if(plugin.getDatabaseView().getDeathChest(event.getPlayer()) == null) {
+			event.getPlayer().sendMessage("You do not yet have a death chest.");
+		}
 	}
 
 	@Override

@@ -1,6 +1,7 @@
 package se.shard.kaustic.mdfpvp.listeners;
 
 import org.bukkit.Chunk;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockIgniteEvent;
@@ -38,12 +39,21 @@ public class MDFPvPBlockListener extends BlockListener {
 	
 	@Override
 	public void onBlockBreak(BlockBreakEvent event) {
-		event.setCancelled(!isAllowedAction(event.getPlayer(), event.getBlock().getChunk()));
+		if(!isAllowedAction(event.getPlayer(), event.getBlock().getChunk())){
+			event.setCancelled(true);
+		}
+		else if(event.getBlock().getType() == Material.CHEST && plugin.getDatabaseView().isDeathChest(event.getBlock())) {
+			event.getPlayer().sendMessage("You can not break a death chest.");
+			event.setCancelled(true);
+		}		
 	}
 
 	@Override
 	public void onBlockIgnite(BlockIgniteEvent event) {
-		if(event.getCause() == IgniteCause.FLINT_AND_STEEL) {
+		if(event.getBlock().getType() == Material.CHEST && plugin.getDatabaseView().isDeathChest(event.getBlock())) {
+			event.setCancelled(true);
+		}
+		else if(event.getCause() == IgniteCause.FLINT_AND_STEEL) {
 			event.setCancelled(!isAllowedAction(event.getPlayer(), event.getBlock().getChunk()));
 		}
 	}
@@ -54,6 +64,21 @@ public class MDFPvPBlockListener extends BlockListener {
 			// Return placed block to owners hand.
 			event.getItemInHand().setAmount(event.getItemInHand().getAmount() + 1);
 			event.setCancelled(true);
+		}
+		// If the player places a chest...
+		else if(event.getBlock().getType() == Material.CHEST) {
+			//...on a claim and has no death chest.
+			if (plugin.getDatabaseView().isOwner(event.getPlayer(), event.getBlock().getChunk()) 
+				&& plugin.getDatabaseView().getDeathChest(event.getPlayer()) == null) {
+				plugin.getDatabaseView().setDeathChest(event.getPlayer(), event.getBlock());
+				event.getPlayer().sendMessage("Created death chest.");
+			}
+			//...and there is an adjacent death chest.
+			else if(plugin.getDatabaseView().hasAdjacentDeathChest(event.getBlock())) {
+				// Return placed block to owners hand.
+				event.getItemInHand().setAmount(event.getItemInHand().getAmount() + 1);
+				event.setCancelled(true);
+			}
 		}
 	}
 }

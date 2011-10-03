@@ -10,6 +10,7 @@ import javax.persistence.JoinTable;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 import org.bukkit.entity.Player;
@@ -32,11 +33,13 @@ public class PlayerData {
 	private int kills;
 	private int killed;
 	@OneToMany(mappedBy = "owner")
-	List<Claim> claims;
+	private List<Claim> claims;
 	@ManyToMany(cascade = CascadeType.PERSIST)
 	@JoinTable(name = "MDFPvP_Tenant",
 			joinColumns={@JoinColumn(name = "tenant_id", referencedColumnName = "player_id")})
-	List<PlayerData> tenants;
+	private List<PlayerData> tenants;
+	@OneToOne(mappedBy = "owner")
+	private DeathChest deathChest;
 	
 	public PlayerData() {}
 	
@@ -203,13 +206,39 @@ public class PlayerData {
 		this.tenants = tenants;
 	}
 	
+	/**
+	 * Gets the death chest of the player.
+	 * @return the death chest of the player.
+	 */
+	public DeathChest getDeathChest() {
+		return deathChest;
+	}
+
+	/**
+	 * Sets the death chest of the player.
+	 * @param deathChest the new death chest of the player.
+	 */
+	public void setDeathChest(DeathChest deathChest) {
+		if(deathChest != null) {
+			if(!this.equals(deathChest.getOwner())) {
+				deathChest.setOwner(this);
+			}
+		}
+		this.deathChest = deathChest;
+	}
+
 	@Override
 	public boolean equals(Object obj) {
-		if(obj instanceof PlayerData) { 
+		if(obj == null) {
+			return false;
+		}
+		else if(obj instanceof PlayerData) { 
 			return ((PlayerData)obj).playerUUID.equals(this.playerUUID);
+		}
+		else if(obj instanceof Player) {
+			System.out.println("Checking " + ((Player)obj).getUniqueId() + " - " + this.playerUUID);
+			return ((Player)obj).getUniqueId().equals(this.playerUUID);
 		}
 		return false;
 	}
-	
-	
 }

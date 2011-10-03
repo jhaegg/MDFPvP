@@ -23,6 +23,10 @@ commands:
     description: Remove a number of players from the list of players allowed the change the players claim.
     permission: mdfpvp.mechanics.disallow
     
+  resetdeathchest:
+    descriptiom: Resets your death chest.
+    permission: mdfpvp.mechanics.resetdeathchest
+    
   setxp:
     description: Sets the total xp of the player
     permission: mdfpvp.admin.setxp
@@ -34,6 +38,9 @@ permissions:
     children:
       mdfpvp.mechanics.claim: true
       mdfpvp.mechanics.removeclaim: true
+      mdfpvp.mechanics.allow: true
+      mdfpvp.mechanics.disallow: true
+      mdfpvp.mechanics.resetdeathchest: true
 
   mdfpvp.mechanics.claim:
     description: Allows user to claim a chunk.
@@ -50,12 +57,17 @@ permissions:
   mdfpvp.mechanics.disallow:
     description: Allows a user to remove players from the list of players allowed to change the players claims.
     default: true
+    
+  mdfpvp.mechanics.resetdeathchest:
+    description: Allows a user to remove their death chest.
+    default: true
   
   mdfpvp.admin.*:
     description: Gives access to all administrator commands.
     children:
       mdfpvp.admin.setxp: true
       mdfpvp.admin.removeclaim: true
+      mdfpvp.admin.resetdeathchest: true
       
   mdfpvp.admin.setxp:
     description: Allows the user to set the total xp of a player.
@@ -63,4 +75,8 @@ permissions:
   
   mdfpvp.admin.removeclaim:
     description: Allows the user to remove any claim.
+    default: op
+    
+  mdfpvp.admin.resetdeathchest:
+    description: Allows the user to remove any deathchest.
     default: op
