@@ -7,12 +7,10 @@ import org.bukkit.Chunk;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.Action;
-import org.bukkit.event.player.PlayerBedEnterEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerListener;
 import org.bukkit.event.player.PlayerMoveEvent;
-import org.bukkit.event.player.PlayerRespawnEvent;
 
 import se.shard.kaustic.mdfpvp.MDFPvP;
 
@@ -91,12 +89,6 @@ public class MDFPvPPlayerListener extends PlayerListener {
 	}
 
 	@Override
-	public void onPlayerBedEnter(PlayerBedEnterEvent event) {
-		// TODO Auto-generated method stub
-		super.onPlayerBedEnter(event);
-	}
-
-	@Override
 	public void onPlayerInteract(PlayerInteractEvent event) {
 		// Don't allow other players to open a players death chest.
 		if(event.getAction() == Action.RIGHT_CLICK_BLOCK) {
@@ -104,6 +96,17 @@ public class MDFPvPPlayerListener extends PlayerListener {
 					&& !plugin.getDatabaseView().canOpenChest(event.getPlayer(), event.getClickedBlock())) {
 				event.setCancelled(true);
 				event.getPlayer().sendMessage("It is locked...");
+			}
+			if(event.getClickedBlock().getType() == Material.BED) {
+				if(!plugin.getDatabaseView().isOwner(event.getPlayer(), event.getClickedBlock().getChunk())) {
+					event.setCancelled(true);
+					event.getPlayer().sendMessage("You cannot sleep in another persons bed.");
+				}
+				else {
+					// Set spawn location workaround and notify player
+					plugin.getDatabaseView().setSpawnLocation(event.getPlayer());
+					event.getPlayer().sendMessage("Spawn location set.");
+				}
 			}
 		}
 	}
@@ -113,6 +116,11 @@ public class MDFPvPPlayerListener extends PlayerListener {
 		// Notify player of missing death chest.
 		if(plugin.getDatabaseView().getDeathChest(event.getPlayer()) == null) {
 			event.getPlayer().sendMessage("You do not yet have a death chest.");
+		}
+		int postponed = plugin.getDatabaseView().getPostponedExperience(event.getPlayer());
+		if(postponed > 0) {
+			event.getPlayer().sendMessage("Awarded " + postponed + "xp from claims.");
+			plugin.getDatabaseView().resetPostponedExperience(event.getPlayer());
 		}
 	}
 
@@ -126,7 +134,7 @@ public class MDFPvPPlayerListener extends PlayerListener {
 			
 			// Check if the player has moved to another chunk.
 			if(!chunkOwnerPair.isSameChunk(chunk)) {
-				String owner = plugin.getDatabaseView().getOwner(chunk);
+				String owner = plugin.getDatabaseView().getOwnerName(chunk);
 				// Check if the new chunk is owned by the same player or still no-one.
 				if(!chunkOwnerPair.isSameOwner(owner)) {
 					if(owner == null) {
@@ -143,16 +151,7 @@ public class MDFPvPPlayerListener extends PlayerListener {
 		}
 		else {
 			// Create a new entry.
-			chunkOwnerMap.put(player.getUniqueId(), new ChunkOwnerPair(chunk, plugin.getDatabaseView().getOwner(chunk)));
+			chunkOwnerMap.put(player.getUniqueId(), new ChunkOwnerPair(chunk, plugin.getDatabaseView().getOwnerName(chunk)));
 		}
 	}
-
-	@Override
-	public void onPlayerRespawn(PlayerRespawnEvent event) {
-		// TODO Auto-generated method stub
-		super.onPlayerRespawn(event);
-	}
-	
-	
-
 }

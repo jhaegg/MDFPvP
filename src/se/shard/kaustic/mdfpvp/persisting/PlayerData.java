@@ -40,6 +40,9 @@ public class PlayerData {
 	private List<PlayerData> tenants;
 	@OneToOne(mappedBy = "owner")
 	private DeathChest deathChest;
+	private int postponedXP;
+	@OneToOne(mappedBy = "owner")
+	private SpawnLocation spawnLocation;
 	
 	public PlayerData() {}
 	
@@ -227,6 +230,43 @@ public class PlayerData {
 		this.deathChest = deathChest;
 	}
 
+	/**
+	 * Gets the postponed experience points waiting for the player.
+	 * @return the postponed experience points waiting for the player.
+	 */
+	public int getPostponedXP() {
+		return postponedXP;
+	}
+
+	/**
+	 * Sets the postponed experience points for the player
+	 * @param postponedXP the new postponed experience points for the player.
+	 */
+	public void setPostponedXP(int postponedXP) {
+		this.postponedXP = postponedXP;
+	}
+	
+	/**
+	 * Gets the spawn location of the player.
+	 * @return the spawn location of the player.
+	 */
+	public SpawnLocation getSpawnLocation() {
+		return spawnLocation;
+	}
+
+	/**
+	 * Sets the spawn location of the player.
+	 * @param spawnLocation the spawnLocation to set
+	 */
+	public void setSpawnLocation(SpawnLocation spawnLocation) {
+		if(spawnLocation != null) {
+			if(!this.equals(spawnLocation.getOwner())) {
+				spawnLocation.setOwner(this);
+			}
+		}
+		this.spawnLocation = spawnLocation;
+	}
+
 	@Override
 	public boolean equals(Object obj) {
 		if(obj == null) {
@@ -236,7 +276,6 @@ public class PlayerData {
 			return ((PlayerData)obj).playerUUID.equals(this.playerUUID);
 		}
 		else if(obj instanceof Player) {
-			System.out.println("Checking " + ((Player)obj).getUniqueId() + " - " + this.playerUUID);
 			return ((Player)obj).getUniqueId().equals(this.playerUUID);
 		}
 		return false;

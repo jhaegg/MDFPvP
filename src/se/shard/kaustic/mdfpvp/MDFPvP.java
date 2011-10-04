@@ -14,15 +14,19 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import se.shard.kaustic.mdfpvp.commands.AllowCommand;
 import se.shard.kaustic.mdfpvp.commands.ClaimCommand;
+import se.shard.kaustic.mdfpvp.commands.ProtectCommand;
 import se.shard.kaustic.mdfpvp.commands.RemoveClaimCommand;
 import se.shard.kaustic.mdfpvp.commands.ResetDeathChestCommand;
 import se.shard.kaustic.mdfpvp.commands.SetXPCommand;
+import se.shard.kaustic.mdfpvp.commands.TrackCommand;
+import se.shard.kaustic.mdfpvp.commands.XPCommand;
 import se.shard.kaustic.mdfpvp.listeners.MDFPvPBlockListener;
 import se.shard.kaustic.mdfpvp.listeners.MDFPvPEntityListener;
 import se.shard.kaustic.mdfpvp.listeners.MDFPvPPlayerListener;
 import se.shard.kaustic.mdfpvp.persisting.Claim;
 import se.shard.kaustic.mdfpvp.persisting.DeathChest;
 import se.shard.kaustic.mdfpvp.persisting.PlayerData;
+import se.shard.kaustic.mdfpvp.persisting.SpawnLocation;
 
 /**
  * Bukkit PvP plugin for MDF Minecraft server.
@@ -34,7 +38,7 @@ public class MDFPvP extends JavaPlugin {
 	private final MDFPvPBlockListener blockListener = new MDFPvPBlockListener(this);
 	private final MDFPvPPlayerListener playerListener = new MDFPvPPlayerListener(this);
 	private final MDFPvPEntityListener entityListener = new MDFPvPEntityListener(this);
-	private final Class<?>[] databaseClasses = {PlayerData.class, Claim.class, DeathChest.class};
+	private final Class<?>[] databaseClasses = {PlayerData.class, Claim.class, DeathChest.class, SpawnLocation.class};
 	private PluginDescriptionFile pdf; 
 	@Override
 	public void onDisable() {
@@ -53,12 +57,15 @@ public class MDFPvP extends JavaPlugin {
 		initDatabase();
 		
 		// Register commands
-		getCommand("claim").setExecutor(new ClaimCommand(this));		
-		getCommand("removeclaim").setExecutor(new RemoveClaimCommand(this));
 		getCommand("allow").setExecutor(new AllowCommand(this, true));
+		getCommand("claim").setExecutor(new ClaimCommand(this));
 		getCommand("disallow").setExecutor(new AllowCommand(this, false));
+		getCommand("protect").setExecutor(new ProtectCommand(this));		
+		getCommand("removeclaim").setExecutor(new RemoveClaimCommand(this));
 		getCommand("resetdeathchest").setExecutor(new ResetDeathChestCommand(this));
-		getCommand("setxp").setExecutor(new SetXPCommand(this));		
+		getCommand("setxp").setExecutor(new SetXPCommand(this));	
+		getCommand("track").setExecutor(new TrackCommand(this));
+		getCommand("xp").setExecutor(new XPCommand(this));
 		
 		// Register player events.
 		pm.registerEvent(Event.Type.PLAYER_INTERACT, playerListener, Priority.Normal, this);

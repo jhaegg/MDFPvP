@@ -3,6 +3,7 @@ package se.shard.kaustic.mdfpvp;
 import java.util.logging.Level;
 
 import org.bukkit.Chunk;
+import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.block.Chest;
 import org.bukkit.entity.Player;
@@ -10,6 +11,7 @@ import org.bukkit.entity.Player;
 import se.shard.kaustic.mdfpvp.persisting.Claim;
 import se.shard.kaustic.mdfpvp.persisting.DeathChest;
 import se.shard.kaustic.mdfpvp.persisting.PlayerData;
+import se.shard.kaustic.mdfpvp.persisting.SpawnLocation;
 
 import com.avaje.ebean.EbeanServer;
 import com.avaje.ebean.QueryIterator;
@@ -171,11 +173,49 @@ public class DatabaseView {
 	}
 
 	/**
+	 * Gets whether the chunk is protected or not.
+	 * @param chunk the chunk go get information about.
+	 * @return true if protected, otherwise false.
+	 */
+	public boolean isProtected(Chunk chunk) {
+		Claim claim = getClaim(chunk);
+		if(claim == null) {
+			return false;
+		}
+		else {
+			return claim.isProtect();
+		}
+	}
+	
+	/**
+	 * Sets the protection flag on the chunk.
+	 * @param chunk the chunk to be protected.
+	 */
+	public void protectClaim(Chunk chunk) {
+		Claim claim = getClaim(chunk);
+		claim.setProtect(true);
+		database.update(claim);
+	}
+	
+	/**
+	 * Gets the player data of the owner of the chunk.
+	 * @param chunk the chunk to be searched for,
+	 * @return null if not claim, otherwise player data of owner.
+	 */
+	private PlayerData getOwnerData(Chunk chunk) {
+		Claim claim = getClaim(chunk);
+		if(claim == null) {
+			return null;
+		}
+		return claim.getOwner();
+	}
+	
+	/**
 	 * Returns the owner of the chunk.
 	 * @param chunk the chunk for which the owner should be found
 	 * @return name of owner if found, otherwise null.
 	 */
-	public String getOwner(Chunk chunk) {
+	public String getOwnerName(Chunk chunk) {
 		Claim claim = getClaim(chunk);
 		if(claim == null) {
 			return null;
@@ -331,18 +371,83 @@ public class DatabaseView {
 	}
 	
 	/**
-	 * Gets the player data associated with the player name
-	 * @param player the name of the player which the data is associated with.
-	 * @return the player data associated with the player.
-	 * @throws IllegalArgumentException if the player is not found
-	 * @deprecated Don't use unless absolutely necessary.
+	 * Gives or postpones xp to the owner of the chunk depending on if they are online or not. Online players will receive reason notification. 
+	 * @param chunk the chunk to be evaluated
+	 * @param xp the amount of xp to give to the owner.
 	 */
-	private PlayerData getPlayerData(String player) throws IllegalArgumentException {
-		PlayerData playerData = database.find(PlayerData.class).where().eq("playerName", player).findUnique();
-
-		if(playerData == null) {
-			throw new IllegalArgumentException("No such player " + player + ".");
-		}		
-		return playerData;
-	}	
+	public void giveOrPostponeExperience(Chunk chunk, int xp, String reason) {
+		Player player = plugin.getServer().getPlayer(getOwnerName(chunk));
+		
+		if(player == null) {
+			// Player is offline, postpone experience until next login.
+			PlayerData playerData = getOwnerData(chunk);
+			playerData.setPostponedXP(playerData.getPostponedXP() + xp);
+			database.update(playerData);
+		}
+		else {
+			// Player is online, give experience directly.
+			player.setTotalExperience(player.getTotalExperience() + xp);
+			player.sendMessage("Received " + xp + "xp for " + reason + ".");
+		}
+	}
+	
+	/**
+	 * Gets the postponed experience of the player;
+	 * @param player the player to get postponed experience for.
+	 * @return the postponed experience of the player.
+	 */
+	public int getPostponedExperience(Player player) {
+		return getPlayerData(player).getPostponedXP();
+	}
+	
+	/**
+	 * Resets the postponed experience of the player to zero.
+	 * @param player the player which postponed experience should be reset.
+	 */
+	public void resetPostponedExperience(Player player) {
+		PlayerData playerData = getPlayerData(player);
+		playerData.setPostponedXP(0);
+		database.update(playerData);
+	}
+	
+	
+	/**
+	 * Gets the players spawn location.
+	 * @param player the player which spawn location should be found.
+	 * @return spawn location if set, otherwise current world default spawning location. 
+	 */
+	public Location getSpawnLocation(Player player) {
+		PlayerData playerData = getPlayerData(player);
+		SpawnLocation location = playerData.getSpawnLocation(); 
+		if(location == null) {
+			return player.getWorld().getSpawnLocation();
+		}
+		else{
+			return new Location(plugin.getServer().getWorld(location.getWorldUUID()),
+					location.getPosX(), location.getPosY(), location.getPosZ());
+		}
+	}
+	
+	/**
+	 * Sets the spawn location of the player
+	 * @param player the player which spawn location should be set to their current location.
+	 */
+	public void setSpawnLocation(Player player) {
+		PlayerData playerData = getPlayerData(player);
+		SpawnLocation location = playerData.getSpawnLocation();
+		
+		if(location == null) {
+			location = new SpawnLocation(player.getLocation());
+			database.insert(location);
+		}
+		else {
+			location.setPosX(player.getLocation().getBlockX());
+			location.setPosY(player.getLocation().getBlockY());
+			location.setPosZ(player.getLocation().getBlockZ());
+			location.setWorldUUID(player.getWorld().getUID());
+			database.update(location);
+		}
+		playerData.setSpawnLocation(location);
+		database.update(playerData);
+	}
 }

@@ -7,43 +7,63 @@ description: >
              PvP Plugin for MDF Minecraft Server
              
 commands:
-  claim:
-    description: Claims the current chunk.
-    permission: mdfpvp.mechanics.claim
-    
-  removeclaim: 
-    description: Removes the claim the player is standing on.
-    permission: mdfpvp.mechanics.removeclaim    
 
   allow:
     description: Add a number of players to the list of players allowed the change the players claim.
     permission: mdfpvp.mechanics.allow
 
+  claim:
+    description: Claims the current chunk.
+    permission: mdfpvp.mechanics.claim
+
   disallow:
     description: Remove a number of players from the list of players allowed the change the players claim.
     permission: mdfpvp.mechanics.disallow
+
+  protect:
+    description: Protects the chunk the player is standing on.
+    permission: mdfpvp.mechanics.protect
     
+  removeclaim: 
+    description: Removes the claim the player is standing on.
+    permission: mdfpvp.mechanics.removeclaim    
+
   resetdeathchest:
     descriptiom: Resets your death chest.
     permission: mdfpvp.mechanics.resetdeathchest
     
+  track:
+    description: Tracks a player using the compass.
+    permission: mdfpvp.mechanics.track
+    
+  xp:
+    description: Shows progress towards next claim.
+    permissiom: mdfpvp.mechanics.xp
+    
   setxp:
     description: Sets the total xp of the player
     permission: mdfpvp.admin.setxp
-    
+        
 permissions:
 
   mdfpvp.mechanics.*:
     description: Gives access to all basic player mechanics.
     children:
-      mdfpvp.mechanics.claim: true
-      mdfpvp.mechanics.removeclaim: true
       mdfpvp.mechanics.allow: true
+      mdfpvp.mechanics.claim: true
       mdfpvp.mechanics.disallow: true
+      mdfpvp.mechanics.protect: true
+      mdfpvp.mechanics.removeclaim: true      
       mdfpvp.mechanics.resetdeathchest: true
+      mdfpvp.mechanics.track: true
+      mdfpvp.mechanics.xp: true
 
   mdfpvp.mechanics.claim:
     description: Allows user to claim a chunk.
+    default: true
+
+  mdfpvp.mechanics.protect:
+    description: Allows the user to protect a chunk.
     default: true
 
   mdfpvp.mechanics.removeclaim:
@@ -60,6 +80,14 @@ permissions:
     
   mdfpvp.mechanics.resetdeathchest:
     description: Allows a user to remove their death chest.
+    default: true
+    
+  mdfpvp.mechanics.track:
+    description: Allows the user to track other players.
+    default: true
+    
+  mdfpvp.mechanics.xp:
+    description: Allows the user to view their experience progress towards next claim.
     default: true
   
   mdfpvp.admin.*:

@@ -30,7 +30,7 @@ public class MDFPvPBlockListener extends BlockListener {
 	 */
 	private boolean isAllowedAction(Player player, Chunk chunk) {
 		if(!plugin.getDatabaseView().canChange(player, chunk)) {
-			player.sendMessage("Action not allowed, chunk owned by " + plugin.getDatabaseView().getOwner(chunk) + ".");
+			player.sendMessage("Action not allowed, chunk owned by " + plugin.getDatabaseView().getOwnerName(chunk) + ".");
 			return false;
 		}
 		
