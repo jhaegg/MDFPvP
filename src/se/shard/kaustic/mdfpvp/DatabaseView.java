@@ -1,5 +1,8 @@
 package se.shard.kaustic.mdfpvp;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 import java.util.logging.Level;
 
 import org.bukkit.Chunk;
@@ -448,6 +451,65 @@ public class DatabaseView {
 			database.update(location);
 		}
 		playerData.setSpawnLocation(location);
+		database.update(playerData);
+	}
+	
+	/**
+	 * Gets a list of UUIDs of all known players.
+	 * @return A list containing the UUIDS of all known players.
+	 */
+	public List<UUID> getPlayerUUIDs() {
+		ArrayList<UUID> UUIDList = new ArrayList<UUID>();
+		for(PlayerData playerData : database.find(PlayerData.class).select("playerUUID").findList()) {
+			UUIDList.add(playerData.getPlayerUUID());
+		}
+		return UUIDList;
+	}
+	
+	/**
+	 * Gets a list of all chunk claimed by the player with the given UUID.
+	 * @param playerUUID the UUID of the player for which all claimed chunks should be retreived.
+	 * @return a list of all chunk claimed by the player with the given UUID.
+	 */
+	public List<Chunk> getClaimedChunks(UUID playerUUID) {
+		PlayerData playerData = database.find(PlayerData.class).where().eq("playerUUID", playerUUID).findUnique();
+		ArrayList<Chunk> chunkList = new ArrayList<Chunk>();
+		for(Claim claim : playerData.getClaims()) {
+			chunkList.add(plugin.getServer().getWorld(claim.getWorldUUID()).getChunkAt(claim.getChunkX(), claim.getChunkZ()));
+		}
+		return chunkList;
+	}
+
+	/**
+	 * Increments the death count in the players score board.
+	 * @param killed the player that died.
+	 */
+	public void addDeath(Player killed) {
+		PlayerData playerData = getPlayerData(killed);
+
+		playerData.setDeaths(playerData.getDeaths() + 1);
+		database.update(playerData);
+	}
+
+	/**
+	 * Increments the killed count in the players score board.
+	 * @param killed the player that was killed.
+	 */
+	public void addKilled(Player killed) {
+		PlayerData playerData = getPlayerData(killed);
+
+		playerData.setKilled(playerData.getKilled() + 1);
+		database.update(playerData);		
+	}
+
+	/**
+	 * Increments the kill count in the players score board.
+	 * @param killer the player who killed another player.
+	 */
+	public void addKill(Player killer) {
+		PlayerData playerData = getPlayerData(killer);
+
+		playerData.setKills(playerData.getKills() + 1);
 		database.update(playerData);
 	}
 }

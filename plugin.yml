@@ -1,6 +1,6 @@
 name: MDFPvP
 main: se.shard.kaustic.mdfpvp.MDFPvP
-version: 0.2.0-pre
+version: 1.0.0-RC1
 author: Johan Haegg
 database: true
 description: >

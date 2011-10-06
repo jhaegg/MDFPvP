@@ -27,6 +27,7 @@ import se.shard.kaustic.mdfpvp.persisting.Claim;
 import se.shard.kaustic.mdfpvp.persisting.DeathChest;
 import se.shard.kaustic.mdfpvp.persisting.PlayerData;
 import se.shard.kaustic.mdfpvp.persisting.SpawnLocation;
+import se.shard.kaustic.mdfpvp.services.ClaimRegionExporter;
 
 /**
  * Bukkit PvP plugin for MDF Minecraft server.
@@ -55,6 +56,10 @@ public class MDFPvP extends JavaPlugin {
 				
 		// Initialize database.
 		initDatabase();
+		
+		// Register services in scheduler. Might need to be executed synchronously if 
+		// chunk loading messes up the server.
+		getServer().getScheduler().scheduleAsyncRepeatingTask(this, new ClaimRegionExporter(this), 200L, 18000L);
 		
 		// Register commands
 		getCommand("allow").setExecutor(new AllowCommand(this, true));

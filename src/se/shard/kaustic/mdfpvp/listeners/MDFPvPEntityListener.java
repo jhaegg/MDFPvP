@@ -51,7 +51,8 @@ public class MDFPvPEntityListener extends EntityListener {
 			PlayerDeathEvent subevent = (PlayerDeathEvent)event;
 			Player killed = (Player)event.getEntity();
 			Chest deathChest = plugin.getDatabaseView().getDeathChest(killed);
-			
+			// Increment player death count
+			plugin.getDatabaseView().addDeath(killed);
 			// If the player has a death chest.
 			if(deathChest != null) {
 				ArrayList<ItemStack> save = new ArrayList<ItemStack>();
@@ -107,6 +108,9 @@ public class MDFPvPEntityListener extends EntityListener {
 					killer.teleport(plugin.getDatabaseView().getSpawnLocation(killer));
 				}
 				killer.sendMessage("Awarded " + give + "xp for killing " + killed.getName());
+				// Add scoreboard data for killer and killed.
+				plugin.getDatabaseView().addKilled(killed);
+				plugin.getDatabaseView().addKill(killer);
 			}
 		}
 		else if(killer != null) {
