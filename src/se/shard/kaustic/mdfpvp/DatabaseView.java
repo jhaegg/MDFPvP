@@ -334,9 +334,11 @@ public class DatabaseView {
 			// Find adjacent death chest.
 			if((deathChest.getPosX() == block.getX() && (block.getZ() - 1 == deathChest.getPosZ() || block.getZ() + 1 == deathChest.getPosZ()))
 					|| deathChest.getPosZ() == block.getZ() && (block.getX() - 1 == deathChest.getPosX() || block.getX() + 1 == deathChest.getPosX())) {
+						deathChests.close();
 						return true;
 					}
 		}
+		deathChests.close();
 		return false;
 	}
 	

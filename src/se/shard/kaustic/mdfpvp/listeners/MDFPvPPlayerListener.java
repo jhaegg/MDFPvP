@@ -7,6 +7,7 @@ import org.bukkit.Chunk;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.player.PlayerBedEnterEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerListener;
@@ -89,6 +90,19 @@ public class MDFPvPPlayerListener extends PlayerListener {
 	}
 
 	@Override
+	public void onPlayerBedEnter(PlayerBedEnterEvent event) {
+		if(!plugin.getDatabaseView().isOwner(event.getPlayer(), event.getBed().getChunk())) {
+			event.setCancelled(true);
+			event.getPlayer().sendMessage("You cannot sleep in another persons bed.");
+		}
+		else {
+			// Set spawn location workaround and notify player
+			plugin.getDatabaseView().setSpawnLocation(event.getPlayer());
+			event.getPlayer().sendMessage("Spawn location set.");
+		}
+	}
+
+	@Override
 	public void onPlayerInteract(PlayerInteractEvent event) {
 		// Don't allow other players to open a players death chest.
 		if(event.getAction() == Action.RIGHT_CLICK_BLOCK) {
@@ -96,17 +110,6 @@ public class MDFPvPPlayerListener extends PlayerListener {
 					&& !plugin.getDatabaseView().canOpenChest(event.getPlayer(), event.getClickedBlock())) {
 				event.setCancelled(true);
 				event.getPlayer().sendMessage("It is locked...");
-			}
-			if(event.getClickedBlock().getType() == Material.BED) {
-				if(!plugin.getDatabaseView().isOwner(event.getPlayer(), event.getClickedBlock().getChunk())) {
-					event.setCancelled(true);
-					event.getPlayer().sendMessage("You cannot sleep in another persons bed.");
-				}
-				else {
-					// Set spawn location workaround and notify player
-					plugin.getDatabaseView().setSpawnLocation(event.getPlayer());
-					event.getPlayer().sendMessage("Spawn location set.");
-				}
 			}
 		}
 	}

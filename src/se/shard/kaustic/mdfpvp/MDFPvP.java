@@ -76,6 +76,7 @@ public class MDFPvP extends JavaPlugin {
 		pm.registerEvent(Event.Type.PLAYER_INTERACT, playerListener, Priority.Normal, this);
 		pm.registerEvent(Event.Type.PLAYER_JOIN, playerListener, Priority.Normal, this);
 		pm.registerEvent(Event.Type.PLAYER_MOVE, playerListener, Priority.Normal, this);
+		pm.registerEvent(Event.Type.PLAYER_BED_ENTER, playerListener, Priority.Normal, this);
 		
 		// Register block events.
 		pm.registerEvent(Event.Type.BLOCK_BREAK, blockListener, Priority.Normal, this);
@@ -85,6 +86,8 @@ public class MDFPvP extends JavaPlugin {
 		// Register entity events.
 		pm.registerEvent(Event.Type.ENTITY_DEATH, entityListener, Priority.Normal, this);
 		pm.registerEvent(Event.Type.ENTITY_EXPLODE, entityListener, Priority.Normal, this);
+		pm.registerEvent(Event.Type.ENDERMAN_PICKUP, entityListener, Priority.Normal, this);
+		pm.registerEvent(Event.Type.ENDERMAN_PLACE, entityListener, Priority.Normal, this);
 		
 		// Notify of completion.
 		getServer().getLogger().log(Level.INFO, "Done.");

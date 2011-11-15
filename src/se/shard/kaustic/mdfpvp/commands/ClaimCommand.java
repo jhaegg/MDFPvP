@@ -34,7 +34,7 @@ public class ClaimCommand extends CommandHandler {
 		}
 		
 		//Check if the player is far enough from the spawn. 
-		int distanceLeft = (int)(plugin.getConfiguration().getInt("MinDistanceFromSpawn", 350) - player.getWorld().getSpawnLocation().distance(player.getLocation()));
+		int distanceLeft = (int)(plugin.getConfig().getInt("MinDistanceFromSpawn", 350) - player.getWorld().getSpawnLocation().distance(player.getLocation()));
 
 		if(distanceLeft > 0) {
 			sender.sendMessage("To close to spawn, move another " + distanceLeft + " steps.");

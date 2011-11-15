@@ -11,6 +11,8 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
 import org.bukkit.entity.TNTPrimed;
+import org.bukkit.event.entity.EndermanPickupEvent;
+import org.bukkit.event.entity.EndermanPlaceEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
@@ -29,6 +31,16 @@ public class MDFPvPEntityListener extends EntityListener {
  	
 	public MDFPvPEntityListener(MDFPvP plugin) {
 		this.plugin = plugin;
+	}
+
+	@Override
+	public void onEndermanPickup(EndermanPickupEvent event) {
+		event.setCancelled(plugin.getDatabaseView().isProtected(event.getBlock().getChunk()));
+	}
+
+	@Override
+	public void onEndermanPlace(EndermanPlaceEvent event) {
+		event.setCancelled(plugin.getDatabaseView().isProtected(event.getLocation().getBlock().getChunk()));
 	}
 
 	@Override
