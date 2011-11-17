@@ -514,4 +514,53 @@ public class DatabaseView {
 		playerData.setKills(playerData.getKills() + 1);
 		database.update(playerData);
 	}
+
+	/**
+	 * Gets a list of neighboring chunks claimed by the same player as the provided chunk.
+	 * @param chunk The chunk for which the neighboring claimed chunks should be found.
+	 * @return A list of all neighboring chunks claimed by the same player as the provided chunk.
+	 */
+	public List<Chunk> getNeighboringClaimedChunks(Chunk chunk) {		
+		ArrayList<Chunk> neighboring = new ArrayList<Chunk>();
+		
+		Claim origin = getClaim(chunk);
+		
+		if(origin == null)
+			return neighboring;
+		
+		int chunkX = chunk.getX();
+		int chunkZ = chunk.getZ();
+		
+		for(Claim claim : origin.getOwner().getClaims()) {			
+			if(claim.getWorldUUID().equals(chunk.getWorld().getUID()) 
+				&& (claim.getChunkX() == chunkX && (claim.getChunkZ() - 1 == chunkZ || claim.getChunkZ() + 1 == chunkZ)) 
+				|| (claim.getChunkZ() == chunkZ && (claim.getChunkX() - 1 == chunkX || claim.getChunkX() + 1 == chunkX))) {
+				neighboring.add(chunk.getWorld().getChunkAt(claim.getChunkX(), claim.getChunkX()));
+			}
+		}
+		
+		return neighboring;
+	}
+	
+	/**
+	 * Checks if all claimed neighbors chunks are connected.
+	 * @param chunk The chunk for which neighbor connectivity should be tested.  
+	 * @return True if all neighbors are connected, otherwise false.
+	 */
+	public boolean areNeighborsConnected(Chunk chunk)
+	{
+		List<Chunk> neighbors = getNeighboringClaimedChunks(chunk);		
+		boolean connected = true;
+		int index;
+		
+		// Search from first neighbor to second, second to third and third to fourth.
+		// If all are reachable then the neighboring chunks are connected.
+		for(index = 0; index < neighbors.size() - 1; index++)
+		{
+			ClaimSearch search = new ClaimSearch(neighbors.get(index), neighbors.get(index + 1), chunk, this);
+			connected &= search.isReachable();
+		}
+		
+		return connected;
+	}
 }

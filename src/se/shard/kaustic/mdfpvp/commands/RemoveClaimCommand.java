@@ -30,9 +30,15 @@ public class RemoveClaimCommand extends CommandHandler {
 		if(!(plugin.getDatabaseView().isOwner(player, chunk) || player.hasPermission("mdfpvp.admin.removeclaim"))) {
 			sender.sendMessage("You are not allowed to remove this claim.");
 			return false;
-		}		
+		}
+		if(!plugin.getDatabaseView().areNeighborsConnected(chunk))
+		{
+			sender.sendMessage("This would split your claim in two.");
+			return false;
+		}
 		if(!plugin.getDatabaseView().removeClaim(chunk)) {
 			sender.sendMessage("Chunk not claimed.");
+			return false;
 		}
 		
 		sender.sendMessage("Claim removed.");
