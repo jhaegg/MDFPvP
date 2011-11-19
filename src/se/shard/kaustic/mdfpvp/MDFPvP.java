@@ -1,11 +1,14 @@
 package se.shard.kaustic.mdfpvp;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.UUID;
 import java.util.logging.Level;
 
 import javax.persistence.PersistenceException;
 
+import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.Event.Priority;
 import org.bukkit.plugin.PluginDescriptionFile;
@@ -15,6 +18,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import se.shard.kaustic.mdfpvp.commands.AllowCommand;
 import se.shard.kaustic.mdfpvp.commands.ClaimCommand;
 import se.shard.kaustic.mdfpvp.commands.ProtectCommand;
+import se.shard.kaustic.mdfpvp.commands.PvPCommand;
 import se.shard.kaustic.mdfpvp.commands.RemoveClaimCommand;
 import se.shard.kaustic.mdfpvp.commands.ResetDeathChestCommand;
 import se.shard.kaustic.mdfpvp.commands.SetXPCommand;
@@ -41,6 +45,9 @@ public class MDFPvP extends JavaPlugin {
 	private final MDFPvPEntityListener entityListener = new MDFPvPEntityListener(this);
 	private final Class<?>[] databaseClasses = {PlayerData.class, Claim.class, DeathChest.class, SpawnLocation.class};
 	private PluginDescriptionFile pdf; 
+	private final HashMap<UUID, Long> pvpEnabled = new HashMap<UUID, Long>();
+	private final long hourMilliseconds = 1000 * 60 * 60;
+	
 	@Override
 	public void onDisable() {
 		// Notify the the plugin has been disabled.
@@ -51,6 +58,7 @@ public class MDFPvP extends JavaPlugin {
 	public void onEnable() {
 		PluginManager pm = getServer().getPluginManager();
 		pdf = getDescription();
+		
 		// Notify the server the the plugin is being enabled.
 		getServer().getLogger().log(Level.INFO, "Enabling " + pdf.getName() + " version " + pdf.getVersion() + ".");
 				
@@ -65,7 +73,8 @@ public class MDFPvP extends JavaPlugin {
 		getCommand("allow").setExecutor(new AllowCommand(this, true));
 		getCommand("claim").setExecutor(new ClaimCommand(this));
 		getCommand("disallow").setExecutor(new AllowCommand(this, false));
-		getCommand("protect").setExecutor(new ProtectCommand(this));		
+		getCommand("protect").setExecutor(new ProtectCommand(this));
+		getCommand("pvp").setExecutor(new PvPCommand(this));		
 		getCommand("removeclaim").setExecutor(new RemoveClaimCommand(this));
 		getCommand("resetdeathchest").setExecutor(new ResetDeathChestCommand(this));
 		getCommand("setxp").setExecutor(new SetXPCommand(this));	
@@ -84,6 +93,7 @@ public class MDFPvP extends JavaPlugin {
 		pm.registerEvent(Event.Type.BLOCK_PLACE, blockListener, Priority.Normal, this);
 		
 		// Register entity events.
+		pm.registerEvent(Event.Type.ENTITY_DAMAGE, entityListener, Priority.Normal, this);
 		pm.registerEvent(Event.Type.ENTITY_DEATH, entityListener, Priority.Normal, this);
 		pm.registerEvent(Event.Type.ENTITY_EXPLODE, entityListener, Priority.Normal, this);
 		pm.registerEvent(Event.Type.ENDERMAN_PICKUP, entityListener, Priority.Normal, this);
@@ -114,7 +124,57 @@ public class MDFPvP extends JavaPlugin {
 		databaseView = new DatabaseView(this, getDatabase());
 	}
 	
+	/**
+	 * Gets the current database view.
+	 * @return The current database view.
+	 */
 	public DatabaseView getDatabaseView() {
 		return databaseView;
 	}
+	
+	/**
+	 * Checks if a player has PvP enabled.
+	 * @param player The player which should be checked.
+	 * @return True if the player has enabled PvP, otherwise false.
+	 */
+	public Boolean isPvPEnabled(Player player) {
+		return isPvPEnabled(player.getUniqueId());
+	}
+	
+	/**
+	 * Checks if a player has PvP enabled.
+	 * @param playerUUID The bukkit unique id of player which should be checked.
+	 * @return True if the player has enabled PvP, otherwise false.
+	 */
+	public Boolean isPvPEnabled(UUID playerUUID) {
+		if(pvpEnabled.containsKey(playerUUID))
+			return pvpEnabled.get(playerUUID) != 0L;
+		
+		return false;
+	}
+	
+	/**
+	 * Sets if the player has PvP enabled or not.
+	 * @param player The player which should be modified.
+	 * @param pvp True if pvp should be enabled, otherwise false.
+	 */
+	public void setPvPEnabled(Player player, Boolean pvp) {
+		if(pvp)
+			pvpEnabled.put(player.getUniqueId(), System.currentTimeMillis());
+		else
+			pvpEnabled.put(player.getUniqueId(), 0L);
+	}
+
+	/**
+	 * Checks if the player can modifie their PvP status.
+	 * @param player The player which should be checked.
+	 * @return True if the player can change PvP status.
+	 */
+	public Boolean canChangePvP(Player player) {
+		if(pvpEnabled.containsKey(player.getUniqueId()))
+			return pvpEnabled.get(player.getUniqueId()) + hourMilliseconds < System.currentTimeMillis();
+		
+		return true;
+	}
+	
 }

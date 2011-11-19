@@ -1,6 +1,6 @@
 name: MDFPvP
 main: se.shard.kaustic.mdfpvp.MDFPvP
-version: 1.0.0-RC3
+version: 1.0.0-RC4
 author: Johan Haegg
 database: true
 description: >
@@ -23,6 +23,10 @@ commands:
   protect:
     description: Protects the chunk the player is standing on.
     permission: mdfpvp.mechanics.protect
+
+  pvp:
+    description: Toggles PvP mode for the player.
+    permission: mdfpvp.mechanics.pvp
     
   removeclaim: 
     description: Removes the claim the player is standing on.
@@ -53,6 +57,7 @@ permissions:
       mdfpvp.mechanics.claim: true
       mdfpvp.mechanics.disallow: true
       mdfpvp.mechanics.protect: true
+      mdfpvp.mechanics.pvp: true
       mdfpvp.mechanics.removeclaim: true      
       mdfpvp.mechanics.resetdeathchest: true
       mdfpvp.mechanics.track: true
@@ -64,6 +69,10 @@ permissions:
 
   mdfpvp.mechanics.protect:
     description: Allows the user to protect a chunk.
+    default: true
+
+  mdfpvp.mechanics.pvp:
+    description: Allows the user to enter and leave pvp mode.
     default: true
 
   mdfpvp.mechanics.removeclaim:

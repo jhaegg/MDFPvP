@@ -268,9 +268,17 @@ public class DatabaseView {
 	 */
 	public boolean canOpenChest(Player player, Block chest) {
 		DeathChest deathChest = getDeathChestData(chest);
+		PlayerData owner = getOwnerData(chest.getChunk());
 		
-		if(deathChest == null) {
+		// Disallow stealing if both players are not in PvP mode.
+		if(owner == null)
 			return true;
+		else {
+			if(owner.equals(player))
+				return true;
+			
+			if(plugin.isPvPEnabled(player) && plugin.isPvPEnabled(owner.getPlayerUUID()) && deathChest == null)
+				return true;
 		}
 		
 		PlayerData playerData = getPlayerData(player);
@@ -547,16 +555,14 @@ public class DatabaseView {
 	 * @param chunk The chunk for which neighbor connectivity should be tested.  
 	 * @return True if all neighbors are connected, otherwise false.
 	 */
-	public boolean areNeighborsConnected(Chunk chunk)
-	{
+	public boolean areNeighborsConnected(Chunk chunk) {
 		List<Chunk> neighbors = getNeighboringClaimedChunks(chunk);		
 		boolean connected = true;
 		int index;
 		
 		// Search from first neighbor to second, second to third and third to fourth.
 		// If all are reachable then the neighboring chunks are connected.
-		for(index = 0; index < neighbors.size() - 1; index++)
-		{
+		for(index = 0; index < neighbors.size() - 1; index++) {
 			ClaimSearch search = new ClaimSearch(neighbors.get(index), neighbors.get(index + 1), chunk, this);
 			connected &= search.isReachable();
 		}

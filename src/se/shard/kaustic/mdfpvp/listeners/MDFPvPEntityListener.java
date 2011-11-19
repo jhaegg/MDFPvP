@@ -14,6 +14,7 @@ import org.bukkit.entity.TNTPrimed;
 import org.bukkit.event.entity.EndermanPickupEvent;
 import org.bukkit.event.entity.EndermanPlaceEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.EntityListener;
@@ -41,6 +42,30 @@ public class MDFPvPEntityListener extends EntityListener {
 	@Override
 	public void onEndermanPlace(EndermanPlaceEvent event) {
 		event.setCancelled(plugin.getDatabaseView().isProtected(event.getLocation().getBlock().getChunk()));
+	}
+
+	@Override
+	public void onEntityDamage(EntityDamageEvent event) {
+		Player damaged = null;
+		Player damager = null;
+		// Negate any player-player damage if both players are not in PvP mode.
+		if(event instanceof EntityDamageByEntityEvent){
+			EntityDamageByEntityEvent subevent = (EntityDamageByEntityEvent)event;
+			if(subevent.getEntity() instanceof Player) {
+				damaged = (Player)subevent.getEntity();
+				if(subevent.getDamager() instanceof Player)
+					damager = (Player)subevent.getDamager();
+				else if(subevent.getDamager() instanceof Projectile) {
+					if(((Projectile)subevent).getShooter() instanceof Player)
+						damager = (Player)((Projectile)subevent).getShooter();						
+				}
+			}
+		}
+		if(damaged == null || damager == null)
+			return;
+		
+		if(!plugin.isPvPEnabled(damaged) || !plugin.isPvPEnabled(damager))
+			event.setCancelled(true);
 	}
 
 	@Override
