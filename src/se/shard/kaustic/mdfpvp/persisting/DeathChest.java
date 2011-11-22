@@ -133,11 +133,11 @@ public class DeathChest {
 	public boolean equals(Object obj) {
 		if(obj instanceof Block) {
 			Block block = (Block)obj;
-			return this.worldUUID.equals(block.getWorld().getUID()) && this.posX == block.getX() && this.posY == block.getY() && this.posZ == block.getZ(); 
+			return this.getWorldUUID().equals(block.getWorld().getUID()) && this.getPosX() == block.getX() && this.getPosY() == block.getY() && this.getPosZ() == block.getZ(); 
 		}
 		else if(obj instanceof DeathChest) {
 			DeathChest deathChest = (DeathChest)obj;
-			return this.worldUUID.equals(deathChest.worldUUID) && this.posX == deathChest.posX && this.posY == deathChest.posY && this.posZ == deathChest.posZ;
+			return this.getWorldUUID().equals(deathChest.getWorldUUID()) && this.getPosX() == deathChest.getPosX() && this.getPosY() == deathChest.getPosY() && this.getPosZ() == deathChest.getPosZ();
 		}
 		return false;
 	}

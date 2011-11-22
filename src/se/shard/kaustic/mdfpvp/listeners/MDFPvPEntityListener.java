@@ -56,8 +56,8 @@ public class MDFPvPEntityListener extends EntityListener {
 				if(subevent.getDamager() instanceof Player)
 					damager = (Player)subevent.getDamager();
 				else if(subevent.getDamager() instanceof Projectile) {
-					if(((Projectile)subevent).getShooter() instanceof Player)
-						damager = (Player)((Projectile)subevent).getShooter();						
+					if(((Projectile)subevent.getDamager()).getShooter() instanceof Player)
+						damager = (Player)((Projectile)subevent.getDamager()).getShooter();						
 				}
 			}
 		}

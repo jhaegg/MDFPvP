@@ -271,20 +271,22 @@ public class DatabaseView {
 		PlayerData owner = getOwnerData(chest.getChunk());
 		
 		// Disallow stealing if both players are not in PvP mode.
-		if(owner == null)
+		if(owner == null) {
 			return true;
-		else {
-			if(owner.equals(player))
-				return true;
-			
-			if(plugin.isPvPEnabled(player) && plugin.isPvPEnabled(owner.getPlayerUUID()) && deathChest == null)
-				return true;
 		}
-		
+		else if (deathChest == null) {
+			System.out.println(plugin.isPvPEnabled(player) + " " + plugin.isPvPEnabled(owner.getPlayerUUID()));
+			if(owner.equals(player) || owner.getTenants().contains(player)) {
+				return true;
+			}
+			else if(plugin.isPvPEnabled(player) && plugin.isPvPEnabled(owner.getPlayerUUID())) {				
+				return true;
+			}
+			return false;
+		}
 		PlayerData playerData = getPlayerData(player);
-		
 		// Long way around due to problems with Avaje.  
-		return playerData.getDeathChest().equals(deathChest);
+		return deathChest.equals(playerData.getDeathChest());
 	}
 	
 	/**

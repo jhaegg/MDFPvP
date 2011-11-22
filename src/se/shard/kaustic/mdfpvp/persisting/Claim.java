@@ -129,7 +129,7 @@ public class Claim {
 	public boolean equals(Object obj) {
 		if(obj instanceof Claim) {
 			Claim claim = (Claim)obj;
-			return claim.worldUUID.equals(this.worldUUID) && claim.chunkX == this.chunkX && claim.chunkZ == this.chunkZ;
+			return claim.getWorldUUID().equals(this.getWorldUUID()) && claim.getChunkX() == this.getChunkX() && claim.getChunkZ() == this.getChunkZ();
 		}		
 		return false;
 	}
