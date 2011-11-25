@@ -165,8 +165,9 @@ public class ClaimRegionExporter implements Runnable {
 		try {
 			exportRegionOverlay();
 		}
-		catch(Exception e) {
+		catch(Exception e) {			
 			plugin.getServer().getLogger().log(Level.WARNING, "Error writing region.js");
+			e.printStackTrace();
 		}
 	}
 }

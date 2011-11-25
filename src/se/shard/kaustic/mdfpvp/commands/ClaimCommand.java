@@ -27,16 +27,16 @@ public class ClaimCommand extends CommandHandler {
 		
 		Player player = (Player)sender;
 		
-		//Don't allow claims in Nether
-		if(player.getLocation().getWorld().getEnvironment() == Environment.NETHER) {
-			sender.sendMessage("You cannot claim chunks in the Nether.");
+		//Don't allow claims in Nether or The End.
+		if(player.getLocation().getWorld().getEnvironment() == Environment.NETHER || player.getLocation().getWorld().getEnvironment() == Environment.THE_END) {
+			sender.sendMessage("You cannot claim chunks in the Nether or The End.");
 			return false;
 		}
 		
 		//Check if the player is far enough from the spawn. 
 		int distanceLeft = (int)(plugin.getConfig().getInt("MinDistanceFromSpawn", 350) - player.getWorld().getSpawnLocation().distance(player.getLocation()));
 
-		if(distanceLeft > 0) {
+		if(distanceLeft > 0 && !player.hasPermission("mdfpvp.admin.claimanywhere")) {
 			sender.sendMessage("To close to spawn, move another " + distanceLeft + " steps.");
 			return false;
 		}

@@ -275,7 +275,7 @@ public class PlayerData {
 		else if(obj instanceof PlayerData) { 			
 			return ((PlayerData)obj).getPlayerUUID().equals(this.getPlayerUUID());
 		}
-		else if(obj instanceof Player) {			
+		else if(obj instanceof Player) {
 			return ((Player)obj).getUniqueId().equals(this.getPlayerUUID());
 		}
 		return false;

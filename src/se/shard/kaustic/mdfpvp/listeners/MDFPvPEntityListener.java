@@ -153,15 +153,17 @@ public class MDFPvPEntityListener extends EntityListener {
 		else if(killer != null) {
 			// Mob killed by a player.
 			Entity killed = event.getEntity();
+			// Award killer 0.2 experience points for each claim he or she owns.
+			killer.setTotalExperience(killer.getTotalExperience() + (int)Math.ceil(0.2 * plugin.getDatabaseView().getNumberOfClaims(killer)));
 			Chunk chunk = killed.getLocation().getBlock().getChunk();
-			// Award one experience point to the owner of the claim.
+			// Award 0.1 experience points for each claim to the owner of the claim.
 			if(plugin.getDatabaseView().isClaimed(chunk)) {
 				// Suppress notification if the player is the killer.
 				if(plugin.getDatabaseView().isOwner(killer, chunk)) {
-					killer.setTotalExperience(killer.getTotalExperience() + 1);
+					killer.setTotalExperience(killer.getTotalExperience() + (int)Math.ceil(0.1 * plugin.getDatabaseView().getNumberOfClaims(killer)));
 				}
 				else {
-					plugin.getDatabaseView().giveOrPostponeExperience(chunk, 1, "death of " + killed.toString());
+					plugin.getDatabaseView().giveOrPostponeExperience(chunk, (int)Math.ceil(0.1 * plugin.getDatabaseView().getNumberOfClaims(killer)), "death of " + killed.toString());
 				}
 			}
 		}

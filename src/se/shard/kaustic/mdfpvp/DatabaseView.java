@@ -241,13 +241,23 @@ public class DatabaseView {
 	 * @return player data associated with the player.
 	 */
 	private PlayerData getPlayerData(Player player) {
-		PlayerData playerData = database.find(PlayerData.class).where().eq("playerUUID", player.getUniqueId()).findUnique();
+		PlayerData playerData;
 		
+		List<PlayerData> players = database.find(PlayerData.class).where().eq("playerUUID", player.getUniqueId()).findList();
+
+
 		// Create if missing
-		if(playerData == null) {
+		if(players.size() == 0) {
 			playerData = new PlayerData(player);
 			database.insert(playerData);
 		}	
+
+		playerData = players.get(0);
+		
+		if(players.size() > 1) {
+			plugin.getServer().getLogger().log(Level.SEVERE, "Multimatch: " + playerData.getPlayerName() + " : " + playerData.getPlayerUUID());
+		}
+
 		return playerData;
 	}
 	
@@ -269,14 +279,14 @@ public class DatabaseView {
 	public boolean canOpenChest(Player player, Block chest) {
 		DeathChest deathChest = getDeathChestData(chest);
 		PlayerData owner = getOwnerData(chest.getChunk());
+		PlayerData playerData = getPlayerData(player);
 		
 		// Disallow stealing if both players are not in PvP mode.
 		if(owner == null) {
 			return true;
 		}
-		else if (deathChest == null) {
-			System.out.println(plugin.isPvPEnabled(player) + " " + plugin.isPvPEnabled(owner.getPlayerUUID()));
-			if(owner.equals(player) || owner.getTenants().contains(player)) {
+		else if (deathChest == null) {			
+			if(owner.equals(player) || owner.getTenants().contains(playerData)) {
 				return true;
 			}
 			else if(plugin.isPvPEnabled(player) && plugin.isPvPEnabled(owner.getPlayerUUID())) {				
@@ -284,7 +294,7 @@ public class DatabaseView {
 			}
 			return false;
 		}
-		PlayerData playerData = getPlayerData(player);
+
 		// Long way around due to problems with Avaje.  
 		return deathChest.equals(playerData.getDeathChest());
 	}
@@ -473,7 +483,9 @@ public class DatabaseView {
 	public List<UUID> getPlayerUUIDs() {
 		ArrayList<UUID> UUIDList = new ArrayList<UUID>();
 		for(PlayerData playerData : database.find(PlayerData.class).select("playerUUID").findList()) {
-			UUIDList.add(playerData.getPlayerUUID());
+			if(!UUIDList.contains(playerData)) {
+				UUIDList.add(playerData.getPlayerUUID());
+			}
 		}
 		return UUIDList;
 	}
@@ -537,18 +549,17 @@ public class DatabaseView {
 		
 		if(origin == null)
 			return neighboring;
-		
+
 		int chunkX = chunk.getX();
 		int chunkZ = chunk.getZ();
-		
+
 		for(Claim claim : origin.getOwner().getClaims()) {			
 			if(claim.getWorldUUID().equals(chunk.getWorld().getUID()) 
 				&& (claim.getChunkX() == chunkX && (claim.getChunkZ() - 1 == chunkZ || claim.getChunkZ() + 1 == chunkZ)) 
 				|| (claim.getChunkZ() == chunkZ && (claim.getChunkX() - 1 == chunkX || claim.getChunkX() + 1 == chunkX))) {
-				neighboring.add(chunk.getWorld().getChunkAt(claim.getChunkX(), claim.getChunkX()));
+				neighboring.add(chunk.getWorld().getChunkAt(claim.getChunkX(), claim.getChunkZ()));
 			}
 		}
-		
 		return neighboring;
 	}
 	
@@ -561,7 +572,7 @@ public class DatabaseView {
 		List<Chunk> neighbors = getNeighboringClaimedChunks(chunk);		
 		boolean connected = true;
 		int index;
-		
+				
 		// Search from first neighbor to second, second to third and third to fourth.
 		// If all are reachable then the neighboring chunks are connected.
 		for(index = 0; index < neighbors.size() - 1; index++) {

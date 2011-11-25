@@ -1,6 +1,6 @@
 name: MDFPvP
 main: se.shard.kaustic.mdfpvp.MDFPvP
-version: 1.0.0-RC5
+version: 1.0.0-RC8
 author: Johan Haegg
 database: true
 description: >
@@ -33,7 +33,7 @@ commands:
     permission: mdfpvp.mechanics.removeclaim    
 
   resetdeathchest:
-    descriptiom: Resets your death chest.
+    description: Resets your death chest.
     permission: mdfpvp.mechanics.resetdeathchest
     
   track:
@@ -42,7 +42,7 @@ commands:
     
   xp:
     description: Shows progress towards next claim.
-    permissiom: mdfpvp.mechanics.xp
+    permission: mdfpvp.mechanics.xp
     
   setxp:
     description: Sets the total xp of the player
@@ -105,6 +105,11 @@ permissions:
       mdfpvp.admin.setxp: true
       mdfpvp.admin.removeclaim: true
       mdfpvp.admin.resetdeathchest: true
+      mdfpvp.admin.claimanywhere: true
+  
+  mdfpvp.admin.claimanywhere:
+    description: Allows the user to claim chunks closer to spawn.
+    default: op
       
   mdfpvp.admin.setxp:
     description: Allows the user to set the total xp of a player.

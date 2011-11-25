@@ -67,7 +67,7 @@ public class ClaimSearch {
 		visited = new ArrayList<Chunk>();
 		search = new PriorityQueue<SearchState>();
 		search.add(new SearchState(start, 0, chunkDistance(start, end)));
-		visited.add(start);
+		visited.add(start); 
 	}
 
 	/**
@@ -94,13 +94,15 @@ public class ClaimSearch {
 	private SearchResult step() {
 		SearchState state = search.poll();
 		
-		if(state == null)
+		if(state == null) {
 			return SearchResult.NotFound;
+		}
 		
 		for(Chunk chunk : view.getNeighboringClaimedChunks(state.chunk)) {
 			if(!visited.contains(chunk)) {
-				if(chunk == end)
+				if(chunk == end) {
 					return SearchResult.Found;
+				}
 				
 				visited.add(chunk);
 				search.add(new SearchState(chunk, state.getActual() + 1, chunkDistance(chunk, end)));
