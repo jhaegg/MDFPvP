@@ -23,7 +23,7 @@ public class XPCommand extends CommandHandler {
 		}		
 		Player player = (Player)sender;
 		
-		sender.sendMessage(player.getTotalExperience() + "/" + plugin.getDatabaseView().getXPRequired(player) + "xp towards claim " + plugin.getDatabaseView().getNumberOfClaims(player) + ".");
+		sender.sendMessage(player.getTotalExperience() + "/" + plugin.getDatabaseView().getXPRequired(player) + "xp with " + plugin.getDatabaseView().getNumberOfClaims(player) + " claims.");
 		return true;
 	}
 }

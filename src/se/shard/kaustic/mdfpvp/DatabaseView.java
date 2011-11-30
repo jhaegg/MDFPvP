@@ -234,30 +234,46 @@ public class DatabaseView {
 	private Claim getClaim(Chunk chunk) {
 		return database.find(Claim.class).where().eq("worldUUID", chunk.getWorld().getUID()).eq("chunkX", chunk.getX()).eq("chunkZ", chunk.getZ()).findUnique();
 	}
-	
+
 	/**
 	 * Gets or creates the player data associated with the player. 
 	 * @param player the player which the player data should be associated with.
 	 * @return player data associated with the player.
 	 */
 	private PlayerData getPlayerData(Player player) {
+		PlayerData playerData = getPlayerData(player.getUniqueId());
+		
+		if(playerData == null) {
+			playerData = new PlayerData(player);
+			database.insert(playerData);
+		}
+		
+		return playerData;
+	}
+	
+	/**
+	 * Gets or the player data associated with the player uuid. 
+	 * @param player the player which the player data should be associated with.
+	 * @return player data associated with the player uuid, null if not found.
+	 */
+	private PlayerData getPlayerData(UUID playerUUID) {
 		PlayerData playerData;
 		
-		List<PlayerData> players = database.find(PlayerData.class).where().eq("playerUUID", player.getUniqueId()).findList();
-
+		List<PlayerData> players = database.find(PlayerData.class).where().eq("playerUUID", playerUUID).findList();
 
 		// Create if missing
 		if(players.size() == 0) {
-			playerData = new PlayerData(player);
-			database.insert(playerData);
+			return null;
 		}	
-
-		playerData = players.get(0);
-		
-		if(players.size() > 1) {
-			plugin.getServer().getLogger().log(Level.SEVERE, "Multimatch: " + playerData.getPlayerName() + " : " + playerData.getPlayerUUID());
+		else
+		{
+			playerData = players.get(0);
+			
+			if(players.size() > 1) {
+				plugin.getServer().getLogger().log(Level.SEVERE, "Multimatch: " + playerData.getPlayerName() + " : " + playerData.getPlayerUUID());
+			}
 		}
-
+		
 		return playerData;
 	}
 	
@@ -483,7 +499,7 @@ public class DatabaseView {
 	public List<UUID> getPlayerUUIDs() {
 		ArrayList<UUID> UUIDList = new ArrayList<UUID>();
 		for(PlayerData playerData : database.find(PlayerData.class).select("playerUUID").findList()) {
-			if(!UUIDList.contains(playerData)) {
+			if(!UUIDList.contains(playerData.getPlayerUUID())) {
 				UUIDList.add(playerData.getPlayerUUID());
 			}
 		}
@@ -496,10 +512,12 @@ public class DatabaseView {
 	 * @return a list of all chunk claimed by the player with the given UUID.
 	 */
 	public List<Chunk> getClaimedChunks(UUID playerUUID) {
-		PlayerData playerData = database.find(PlayerData.class).where().eq("playerUUID", playerUUID).findUnique();
+		PlayerData playerData = getPlayerData(playerUUID);
 		ArrayList<Chunk> chunkList = new ArrayList<Chunk>();
-		for(Claim claim : playerData.getClaims()) {
-			chunkList.add(plugin.getServer().getWorld(claim.getWorldUUID()).getChunkAt(claim.getChunkX(), claim.getChunkZ()));
+		if(playerData != null) {
+			for(Claim claim : playerData.getClaims()) {
+				chunkList.add(plugin.getServer().getWorld(claim.getWorldUUID()).getChunkAt(claim.getChunkX(), claim.getChunkZ()));
+			}
 		}
 		return chunkList;
 	}

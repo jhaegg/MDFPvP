@@ -93,21 +93,21 @@ public class MDFPvPEntityListener extends EntityListener {
 			// If the player has a death chest.
 			if(deathChest != null) {
 				ArrayList<ItemStack> save = new ArrayList<ItemStack>();
-				// Put armor and hotbar in chest.
+				// Put armor and hotbar in chest and remove those items from the dropped items.
 				ItemStack[] armor = killed.getInventory().getArmorContents();
 				
 				for(int index = 0; index < armor.length; index++) {
 					if(armor[index].getType() != Material.AIR) {
 						save.add(armor[index]);
+						event.getDrops().remove(armor[index]);
 					}
 				}
 				for(int index = 0; index < 9; index++) {
 					if(killed.getInventory().getItem(index).getType() != Material.AIR) {
 						save.add(killed.getInventory().getItem(index));
+						event.getDrops().remove(killed.getInventory().getItem(index));
 					}
 				}
-				// Remove all saved items.
-				event.getDrops().removeAll(save);
 				// Workaround for list as argument.
 				ItemStack[] itemStack = new ItemStack[save.size()];
 				// Add all items that will not fit in the death chest to the dropped items.
@@ -145,6 +145,7 @@ public class MDFPvPEntityListener extends EntityListener {
 					killer.teleport(plugin.getDatabaseView().getSpawnLocation(killer));
 				}
 				killer.sendMessage("Awarded " + give + "xp for killing " + killed.getName());
+				killer.setTotalExperience(killer.getTotalExperience() + give);
 				// Add scoreboard data for killer and killed.
 				plugin.getDatabaseView().addKilled(killed);
 				plugin.getDatabaseView().addKill(killer);
@@ -184,16 +185,16 @@ public class MDFPvPEntityListener extends EntityListener {
 			}
 			
 			if(protect) {
-				if(event.getEntity() instanceof TNTPrimed) {
-					// Protect death chests from TNT
-					if(block.getType() == Material.CHEST && plugin.getDatabaseView().isDeathChest(block)) {
-						event.setCancelled(true);
-					}
+			    // Chunk should be protected from everything except TNT.
+				if(!(event.getEntity() instanceof TNTPrimed)) {
+				    event.setCancelled(true);
+				    return;
 				}
 			}
 			// Protect unprotected chunks with a death chest from everything.
 			else if(block.getType() == Material.CHEST && plugin.getDatabaseView().isDeathChest(block)) {
-				protect = true;
+				event.setCancelled(true);
+				return;
 			}
 		}
 	}
