@@ -1,6 +1,6 @@
 name: MDFPvP
 main: se.shard.kaustic.mdfpvp.MDFPvP
-version: 1.0.0-RC11
+version: 1.0.1-REVIEW
 author: Johan Haegg
 database: true
 description: >
@@ -19,6 +19,10 @@ commands:
   disallow:
     description: Remove a number of players from the list of players allowed the change the players claim.
     permission: mdfpvp.mechanics.disallow
+    
+  newclaim:
+    description: Creates a new separate claim.
+    permission: mdfpvp.mechanics.newclaim
 
   protect:
     description: Protects the chunk the player is standing on.
@@ -56,6 +60,7 @@ permissions:
       mdfpvp.mechanics.allow: true
       mdfpvp.mechanics.claim: true
       mdfpvp.mechanics.disallow: true
+      mdfpvp.mechanics.newclaim: true
       mdfpvp.mechanics.protect: true
       mdfpvp.mechanics.pvp: true
       mdfpvp.mechanics.removeclaim: true      
@@ -86,6 +91,10 @@ permissions:
   mdfpvp.mechanics.disallow:
     description: Allows a user to remove players from the list of players allowed to change the players claims.
     default: true
+   
+  mdfpvp.mechanics.newclaim: 
+    description: Allows a user to create new separate claims.
+    defailt: true
     
   mdfpvp.mechanics.resetdeathchest:
     description: Allows a user to remove their death chest.

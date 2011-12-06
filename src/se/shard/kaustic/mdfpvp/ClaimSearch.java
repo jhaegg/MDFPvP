@@ -84,7 +84,9 @@ public class ClaimSearch {
 		search = new PriorityQueue<SearchState>();
 		search.add(new SearchState(start, 0, chunkDistance(start, end)));
 		visited.add(start);
-		visited.add(ignore);
+		if(ignore != null) {
+		    visited.add(ignore);
+		}
 	}
 	
 	/**

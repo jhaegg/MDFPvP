@@ -593,11 +593,55 @@ public class DatabaseView {
 				
 		// Search from first neighbor to second, second to third and third to fourth.
 		// If all are reachable then the neighboring chunks are connected.
-		for(index = 0; index < neighbors.size() - 1; index++) {
+		for(index = 0; index < neighbors.size() - 1 && connected; index++) {
 			ClaimSearch search = new ClaimSearch(neighbors.get(index), neighbors.get(index + 1), chunk, this);
 			connected &= search.isReachable();
 		}
 		
 		return connected;
+	}
+	
+	
+	/**
+	 * Counts the number of unconnected neighbors of a chunk.
+	 * @param chunk The chunk for which unconnected neighbors should be counted.
+	 * @return The number neighboring chunks which are not connected.
+	 */
+	public int countUnconnectedNeighbors(Chunk chunk) {
+	    List<Chunk> neighbors = getNeighboringClaimedChunks(chunk);
+	    int numUnconnected = neighbors.size();
+	    
+	    for(int i = 0; i < neighbors.size() - 1; i++) {
+	        for(int j = i + 1; j < neighbors.size(); j ++) {
+	            ClaimSearch search = new ClaimSearch(neighbors.get(i), neighbors.get(j), null, this);
+	            if(search.isReachable()) {
+	                numUnconnected--;
+	                continue;
+	            }
+	        }
+	    }
+	    return numUnconnected;
+	}
+	
+	/**
+	 * Gets the number of separate claims owned by a player.
+	 * @param player The player for which the number of separate claims should be retreived.
+	 * @return the number of separate claims owned by the player.
+	 */
+	public int getSeparateClaimCount(Player player) {
+	    PlayerData playerData = getPlayerData(player);
+	    
+	    return playerData.getSeparateClaims();
+	}
+	
+	/**
+	 * Sets the number of separate claims owned by a player
+	 * @param player The player for which the number of separate claims should be modified.
+	 * @param separateClaims The new number of separate claims owned by the player.
+	 */
+	public void setSeparateClaimCount(Player player, int separateClaims) {
+	    PlayerData playerData = getPlayerData(player);
+	    
+	    playerData.setSeparateClaims(separateClaims);
 	}
 }

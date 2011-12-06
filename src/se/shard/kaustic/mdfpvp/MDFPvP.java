@@ -71,8 +71,9 @@ public class MDFPvP extends JavaPlugin {
 		
 		// Register commands
 		getCommand("allow").setExecutor(new AllowCommand(this, true));
-		getCommand("claim").setExecutor(new ClaimCommand(this));
+		getCommand("claim").setExecutor(new ClaimCommand(this, false));
 		getCommand("disallow").setExecutor(new AllowCommand(this, false));
+		getCommand("newclaim").setExecutor(new ClaimCommand(this, true));
 		getCommand("protect").setExecutor(new ProtectCommand(this));
 		getCommand("pvp").setExecutor(new PvPCommand(this));		
 		getCommand("removeclaim").setExecutor(new RemoveClaimCommand(this));

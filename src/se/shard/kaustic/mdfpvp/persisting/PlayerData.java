@@ -43,6 +43,7 @@ public class PlayerData {
 	private int postponedXP;
 	@OneToOne(mappedBy = "owner")
 	private SpawnLocation spawnLocation;
+	private int separateClaims;
 	
 	public PlayerData() {}
 	
@@ -52,6 +53,7 @@ public class PlayerData {
 		deaths = 0;
 		kills = 0;
 		killed = 0;
+		separateClaims = 0;
 	}
 	
 	/**
@@ -256,7 +258,7 @@ public class PlayerData {
 
 	/**
 	 * Sets the spawn location of the player.
-	 * @param spawnLocation the spawnLocation to set
+	 * @param spawnLocation the new spawn location of the player.
 	 */
 	public void setSpawnLocation(SpawnLocation spawnLocation) {
 		if(spawnLocation != null) {
@@ -267,7 +269,23 @@ public class PlayerData {
 		this.spawnLocation = spawnLocation;
 	}
 
-	@Override
+	/**
+	 * Gets the number of separate claims owned by the player.
+     * @return the number of separate claims owned by the player.
+     */
+    public int getSeparateClaims() {
+        return separateClaims;
+    }
+
+    /**
+     * Sets the number of separate claims owned by the player.
+     * @param separateClaims the new number of separate claims owned by the player.
+     */
+    public void setSeparateClaims(int separateClaims) {
+        this.separateClaims = separateClaims;
+    }
+
+    @Override
 	public boolean equals(Object obj) {
 		if(obj == null) {
 			return false;

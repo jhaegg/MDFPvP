@@ -15,8 +15,11 @@ import se.shard.kaustic.mdfpvp.MDFPvP;
  */
 public class ClaimCommand extends CommandHandler {
 
-	public ClaimCommand(MDFPvP plugin) {
+    private boolean newClaim;
+    
+	public ClaimCommand(MDFPvP plugin, boolean newClaim) {
 		super(plugin);
+		this.newClaim = newClaim;
 	}
 
 	@Override
@@ -50,6 +53,9 @@ public class ClaimCommand extends CommandHandler {
 		
 		//Check if the player has enough XP
 		int remainingXP = player.getTotalExperience() - plugin.getDatabaseView().getXPRequired(player);
+		if(newClaim)
+		    remainingXP -= plugin.getDatabaseView().getSeparateClaimCount(player) * 100;
+		
 		if(remainingXP < 0) {
 			sender.sendMessage("Not enough XP, you need another " + (-remainingXP) + "xp to claim a chunk.");
 			return false;
@@ -60,13 +66,23 @@ public class ClaimCommand extends CommandHandler {
 			sender.sendMessage("No adjacent claim.");
 			return false;
 		}
+		else if(newClaim) {
+		    sender.sendMessage("Chunk has adjacent claims or you have no claim, no need to create a new.");
+		    return false;
+		}
+		else {
+		    int recentlyConnected = plugin.getDatabaseView().countUnconnectedNeighbors(chunk) - 1;
+		    plugin.getDatabaseView().setSeparateClaimCount(player, plugin.getDatabaseView().getSeparateClaimCount(player) - recentlyConnected);
+		}
 		
 		//Claim chunk and update experience.
 		player.setTotalExperience(remainingXP);
+		if(plugin.getDatabaseView().getNumberOfClaims(player) == 0 || newClaim) {
+		    plugin.getDatabaseView().setSeparateClaimCount(player, plugin.getDatabaseView().getSeparateClaimCount(player) + 1);
+		}
+		
 		plugin.getDatabaseView().claimChunk(player);
 		sender.sendMessage("Chunk claimed.");
 		return true;
 	}
-	
-	
 }
